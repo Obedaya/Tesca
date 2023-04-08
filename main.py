@@ -11,6 +11,7 @@ def wait_for_start_time(start_time):
     while True:
         current_time = datetime.datetime.now().time()
         if current_time >= start_time:
+            sleep(current_time-start_time)
             break
 
 
@@ -89,7 +90,7 @@ def setTeslachargingAmp(chargingAmp):
         print("Not enough power. Won't charge!")
 
 
-with open("config.yml", "r") as ymlfile:
+with open("config.test.yml", "r") as ymlfile:
     cfg = yaml.load(ymlfile, Loader=FullLoader)
 
 previous = 0
@@ -108,7 +109,9 @@ vehicles = tesla.vehicle_list()
 battery = batteries[0]
 car = vehicles[0]
 
-if start_time > current_time > end_time:
+if current_time < start_time:
     wait_for_start_time(start_time)
+elif current_time > end_time:
+    quit()
 
 run_charging_loop(start_time, end_time)

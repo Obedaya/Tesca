@@ -1,0 +1,13 @@
+user:
+  mail:
+  latitude:
+  longitude:
+technical:
+  # Mains Voltage in Volt
+  mains_voltage:
+  # Buffer in Watt
+  buffer:
+  min_charging_amp:
+  max_charging_amp:
+  # Time between measurements in seconds
+  sleep_time:
