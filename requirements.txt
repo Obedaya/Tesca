@@ -1,0 +1,3 @@
+PyYAML==6.0
+suntime==1.2.5
+TeslaPy==2.7.0
