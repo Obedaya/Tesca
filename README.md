@@ -38,7 +38,10 @@ pip install -r requirements.txt
 ## Usage
 
 ---
-To use the program you need to configure the config file.
+To use the program you need to configure the config file:
+```
+sudo nano config.yml
+```
 
 Run the script:
 ```

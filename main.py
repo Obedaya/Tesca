@@ -90,7 +90,7 @@ def setTeslachargingAmp(chargingAmp):
         print("Not enough power. Won't charge!")
 
 
-with open("config.test.yml", "r") as ymlfile:
+with open("config.yml", "r") as ymlfile:
     cfg = yaml.load(ymlfile, Loader=FullLoader)
 
 previous = 0
