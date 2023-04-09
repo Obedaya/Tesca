@@ -1,0 +1,13 @@
+user:
+  mail: mail@familie-holzner.de
+  latitude: 48.1021
+  longitude: 11.2977
+technical:
+  # Mains Voltage in Volt
+  mains_voltage: 230
+  # Buffer in Watt
+  buffer: 100
+  min_charging_amp: 5
+  max_charging_amp: 13
+  # Time between measurements in seconds
+  sleep_time: 10

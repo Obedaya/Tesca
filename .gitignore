@@ -1,5 +1,5 @@
 /cache.json
-/config.yml
 /Pipfile
 /Pipfile.lock
 /.idea
+/config.test.yml
