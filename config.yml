@@ -9,5 +9,5 @@ technical:
   buffer:
   min_charging_amp:
   max_charging_amp:
-  # Time between measurements in seconds
+  # Time between measurements in seconds 900 = 15 min
   sleep_time:
