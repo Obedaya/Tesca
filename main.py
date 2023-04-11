@@ -11,7 +11,7 @@ def wait_for_start_time(start_time):
     while True:
         current_time = datetime.datetime.now().time()
         if current_time >= start_time:
-            sleep(current_time-start_time)
+            time.sleep(current_time-start_time)
             break
 
 
@@ -56,7 +56,6 @@ def calculateChargingAmp(data, cardata):
 
 
 def calculateCharging():
-    print(battery)
     data = battery.get_battery_data()
     cardata = car.get_vehicle_data()
     print("----------------------------------------")
@@ -89,6 +88,13 @@ def setTeslachargingAmp(chargingAmp):
     else:
         print("Not enough power. Won't charge!")
 
+
+print("========================================")
+print(" _______ _______ _______ _______ _______")
+print("    |    |______ |______ |       |_____|")
+print("    |    |______ ______| |_____  |     |")
+print("                                        ")
+print("========================================")
 
 with open("config.yml", "r") as ymlfile:
     cfg = yaml.load(ymlfile, Loader=FullLoader)
