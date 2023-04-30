@@ -2,7 +2,13 @@
 
 ---
 
-TESCA (Tesla Solar Charging Automation) is a program that aims to charge your Tesla vehicle with excess solar energy. The goal is to charge both the Tesla vehicle and a Tesla Powerwall evenly. The script is written in Python and uses the Teslapy API.
+TESCA (Tesla Solar Charging Automation) is a program that aims to charge your Tesla vehicle with excess solar energy. The goal is to charge both the Tesla vehicle and a Tesla Powerwall evenly. The script is written in Python and uses the [TeslaPy API](https://github.com/tdorssers/TeslaPy).
+
+## Changelog
+
+Tesca Version: v.1.0.1
+- Fixed minor bugs
+- Added check if car battery is full
 
 ## What you'll need
 
