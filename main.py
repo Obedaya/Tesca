@@ -20,7 +20,7 @@ def run_charging_loop(start_time, end_time):
     calculateAverage(calculateCharging())
     while datetime.datetime.now().time() < end_time:
         amp = calculateAverage(currently)
-        # setTeslachargingAmp(amp)
+        setTeslachargingAmp(amp)
     print("Ending loop...")
 
 def chargingPossible(data, cardata) -> bool:
@@ -41,7 +41,7 @@ def wallboxAmpLimit(possibleAmp):
 
 
 def calculateChargingAmp(data, cardata):
-    if chargingPossible(data, cardata):
+    if chargingPossible(data, cardata) and cardata['charge_state']['charge_limit_soc'] != cardata['charge_state']['battery_level']:
         # Overhead power gets calculated by:
         # subtracting the load power (power which is being used) + buffer (0,1kW) - the power which is being drained currently by the car,
         # of the power which gets generated
@@ -50,6 +50,10 @@ def calculateChargingAmp(data, cardata):
         teslaChargingAmperage = math.floor(teslaChargingPower / cfg['technical']['mains_voltage'])
         chargingAmp = wallboxAmpLimit(teslaChargingAmperage)
         return chargingAmp
+        # Check if car already full
+    elif cardata['charge_state']['charge_limit_soc'] == cardata['charge_state']['battery_level']:
+        print("Already full. Won't charge!")
+        return 0
     else:
         print("Not enough power. Won't charge!")
         return 0
@@ -70,13 +74,17 @@ def calculateAverage(currentamp):
     previous = currentamp
     time.sleep(cfg['technical']['sleep_time'])
     currently = calculateCharging()
-    chargingAmp = previous + currently / 2
+    chargingAmp = math.floor((previous + currently) / 2)
+    print("Average: " + str(chargingAmp))
+    chargingAmp = wallboxAmpLimit(chargingAmp)
     return chargingAmp
 
 
 # Function to control charging of the car
 def setTeslachargingAmp(chargingAmp):
+    car.sync_wake_up()
     cardata = car.get_vehicle_data()
+
     if chargingAmp > 0:
         if cardata['charge_state']['charging_state'] != 'Charging':
             car.command('START_CHARGE')
@@ -118,6 +126,6 @@ car = vehicles[0]
 if current_time < start_time:
     wait_for_start_time(start_time)
 elif current_time > end_time:
-    quit()
+   quit()
 
 run_charging_loop(start_time, end_time)
