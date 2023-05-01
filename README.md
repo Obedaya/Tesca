@@ -30,8 +30,14 @@ The program takes several measurements in certain time intervals and calculates 
 
 Clone the repository:
 ```
-git clone https://github.com/Obedaya/Tesla-Charging-Automation.git
+git clone https://github.com/Obedaya/Tesca.git
 ```
+
+Go into the directory:
+```
+cd Tesca
+```
+
 
 In order to use the program you need to install all requirements:
 ```
