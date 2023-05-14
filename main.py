@@ -20,11 +20,11 @@ def run_charging_loop(end_time):
     print("Starting loop...")
     previous = calculate_charging()
     while datetime.datetime.now().time() < end_time:
-        previous = calculate_charging()
         time.sleep(cfg['technical']['sleep_time'])
         current = calculate_charging()
         amp = calculate_average(previous, current)
         set_tesla_charging_amp(wallbox_amp_limit(amp))
+        previous = current
     print("Ending loop...")
 
 
