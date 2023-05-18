@@ -3,6 +3,8 @@ import time
 import math
 import datetime
 import yaml
+import logging
+from logging.handlers import TimedRotatingFileHandler
 from yaml.loader import FullLoader
 from suntime import Sun, SunTimeException
 
@@ -12,29 +14,37 @@ def wait_for_start_time(start_time):
     while True:
         current_time = datetime.datetime.now().time()
         if current_time >= start_time:
-            time.sleep(current_time - start_time)
             break
 
 
 def run_charging_loop(end_time):
     print("Starting loop...")
+    logger.info("|Solar power|House usage|Tesla percentage|Powerwall percentage|Tesla currently charging|Overhead "
+                "power|Charging possible with|Charging with|")
     previous = calculate_charging()
     while datetime.datetime.now().time() < end_time:
         time.sleep(cfg['technical']['sleep_time'])
-        current = calculate_charging()
+        pwl_data = battery.get_battery_data()
+        car_data = car.get_vehicle_data()
+        current = calculate_charging(pwl_data, car_data)
         amp = calculate_average(previous, current)
         set_tesla_charging_amp(wallbox_amp_limit(amp))
+        log_data(pwl_data, car_data, amp)
         previous = current
     print("Ending loop...")
 
 
-def charging_possible(data, car_data) -> bool:
+def charging_possible(pwl_data, car_data) -> bool:
     # Only charge if the power production + buffer (0,1kW) - the car charging power, is higher than the power being used
-    if (data['power_reading'][0]['load_power'] + cfg['technical']['buffer']) - \
-            (car_data['charge_state']['charger_power'] * 1000) >= data['power_reading'][0]['solar_power']:
+    if calculate_overhead_power(pwl_data, car_data) >= pwl_data['power_reading'][0]['solar_power']:
         return False
     else:
         return True
+
+
+def calculate_overhead_power(pwl_data, car_data):
+    return (pwl_data['power_reading'][0]['load_power'] + cfg['technical']['buffer']) - \
+            (car_data['charge_state']['charger_power'] * 1000)
 
 
 def wallbox_amp_limit(possible_amp):
@@ -46,18 +56,18 @@ def wallbox_amp_limit(possible_amp):
         return 0
 
 
-def calculate_charging_amp(data, car_data):
-    if charging_possible(data, car_data) and car_data['charge_state']['charge_limit_soc'] \
+def calculate_charging_amp(pwl_data, car_data):
+    if charging_possible(pwl_data, car_data) and car_data['charge_state']['charge_limit_soc'] \
             != car_data['charge_state']['battery_level']:
         # Overhead power gets calculated by:
         # subtracting the load power (power which is being used) + buffer (0,1kW)
         # - the power which is being drained currently by the car,
         # of the power which gets generated
-        overhead_power = data['power_reading'][0]['solar_power'] \
-                         - (data['power_reading'][0]['load_power']
+        overhead_power = pwl_data['power_reading'][0]['solar_power'] \
+                         - (pwl_data['power_reading'][0]['load_power']
                             + cfg['technical']['buffer']
                             - (car_data['charge_state']['charger_power'] * 1000))
-        tesla_charging_power = (data['percentage_charged'] / 100) * overhead_power
+        tesla_charging_power = (pwl_data['percentage_charged'] / 100) * overhead_power
         tesla_charging_amperage = math.floor(tesla_charging_power / cfg['technical']['mains_voltage'])
         return tesla_charging_amperage
 
@@ -70,12 +80,10 @@ def calculate_charging_amp(data, car_data):
         return 0
 
 
-def calculate_charging():
-    data = battery.get_battery_data()
-    car_data = car.get_vehicle_data()
+def calculate_charging(pwl_data, car_data):
     print("----------------------------------------")
-    charging_amp = calculate_charging_amp(data, car_data)
-    print(str(data['power_reading'][0]['timestamp']))
+    charging_amp = calculate_charging_amp(pwl_data, car_data)
+    print(str(pwl_data['power_reading'][0]['timestamp']))
     print("Charging possible with: " + str(charging_amp))
     print("----------------------------------------")
     return charging_amp
@@ -104,6 +112,28 @@ def set_tesla_charging_amp(charging_amp):
         print("Not enough power. Won't charge!")
 
 
+def log_data(pwl_data, car_data, tesla_amp):
+    log_string = (str(round(pwl_data['power_reading'][0]['solar_power']))
+                  + ";" + str(round(pwl_data['power_reading'][0]['load_power']))
+                  + ";" + str(round(car_data['charge_state']['battery_level']))
+                  + ";" + str(round(pwl_data['percentage_charged']))
+                  + ";" + str(round(car_data['charge_state']['charge_current_request']))
+                  + ";" + str(round(calculate_overhead_power(pwl_data, car_data)))
+                  + ";" + str(tesla_amp)
+                  + ";" + str(wallbox_amp_limit(tesla_amp)))
+    logger.info(log_string)
+
+
+# Start of the main program
+
+log_handler = TimedRotatingFileHandler('tesca.log', when='midnight', interval=1, backupCount=10)
+log_formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+log_handler.setFormatter(log_formatter)
+log_handler.setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.addHandler(log_handler)
+logger.setLevel(logging.DEBUG)
+
 print("========================================")
 print(" _______ _______ _______ _______ _______")
 print("    |    |______ |______ |       |_____|")
@@ -118,9 +148,9 @@ sun = Sun(cfg['user']['latitude'], cfg['user']['longitude'])
 today_sr = sun.get_sunrise_time()
 today_ss = sun.get_sunset_time()
 
-start_time = datetime.time(hour=today_sr.hour, minute=today_sr.minute, second=today_sr.second)
-end_time = datetime.time(hour=today_ss.hour, minute=today_ss.minute, second=today_ss.second)
-current_time = datetime.datetime.now().time()
+start_time = datetime.datetime.combine(datetime.date.today(), today_sr.time())
+end_time = datetime.datetime.combine(datetime.date.today(), today_ss.time())
+current_time = datetime.datetime.now()
 
 tesla = teslapy.Tesla(cfg['user']['mail'])
 batteries = tesla.battery_list()
@@ -128,9 +158,9 @@ vehicles = tesla.vehicle_list()
 battery = batteries[0]
 car = vehicles[0]
 
-if current_time < start_time:
-    wait_for_start_time(start_time)
-elif current_time > end_time:
+if current_time.time() < start_time.time():
+    wait_for_start_time(start_time.time())
+elif current_time.time() > end_time.time():
     quit()
 
 run_charging_loop(end_time)

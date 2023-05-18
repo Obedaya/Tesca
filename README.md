@@ -6,6 +6,11 @@ TESCA (Tesla Solar Charging Automation) is a program that aims to charge your Te
 
 ## Changelog
 
+Tesca Version: v.1.0.2
+- Added logging system
+- Changes structure
+- Fixed minor bugs
+
 Tesca Version: v.1.0.1
 - Fixed minor bugs
 - Added check if car battery is full

@@ -3,3 +3,4 @@
 /Pipfile.lock
 /.idea
 /config.test.yml
+/*.log
