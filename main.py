@@ -10,11 +10,19 @@ from suntime import Sun, SunTimeException
 
 
 def wait_for_start_time(start_time):
-    print("Waiting for start time...")
-    while True:
-        current_time = datetime.datetime.now().time()
-        if current_time >= start_time:
-            break
+    current_time = datetime.datetime.now().time()
+    time_diff = datetime.datetime.combine(datetime.date.today(), start_time) - datetime.datetime.combine(datetime.date.today(), current_time)
+    sleep_seconds = time_diff.total_seconds()
+    sleep_hours_format, remainder = divmod(round(sleep_seconds), 3600)
+    sleep_minutes_format, sleep_seconds_format = divmod(remainder, 60)
+
+    formatted_time = "{:02d}:{:02d}:{:02d}".format(sleep_hours_format, sleep_minutes_format, sleep_seconds_format)
+
+    if sleep_seconds > 0:
+        print(f"Waiting for start time... Sleeping for {formatted_time}.")
+        time.sleep(sleep_seconds)
+    else:
+        print("Start time already passed. Proceeding with the execution.")
 
 
 def run_charging_loop(end_time):
