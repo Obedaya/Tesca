@@ -151,7 +151,7 @@ print("    |    |______ ______| |_____  |     |")
 print("                                        ")
 print("========================================")
 
-with open("config.test.yml", "r") as ymlfile:
+with open("config.yml", "r") as ymlfile:
     cfg = yaml.load(ymlfile, Loader=FullLoader)
 
 sun = Sun(cfg['user']['latitude'], cfg['user']['longitude'])
