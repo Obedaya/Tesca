@@ -155,8 +155,8 @@ with open("config.yml", "r") as ymlfile:
     cfg = yaml.load(ymlfile, Loader=FullLoader)
 
 sun = Sun(cfg['user']['latitude'], cfg['user']['longitude'])
-today_sr = sun.get_sunrise_time()
-today_ss = sun.get_sunset_time()
+today_sr = sun.get_sunrise_time() + datetime.timedelta(hours=cfg['user']['time_difference'])
+today_ss = sun.get_sunset_time() + datetime.timedelta(hours=cfg['user']['time_difference'])
 
 start_time = datetime.datetime.combine(datetime.date.today(), today_sr.time())
 end_time = datetime.datetime.combine(datetime.date.today(), today_ss.time())

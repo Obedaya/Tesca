@@ -2,6 +2,8 @@ user:
   mail:
   latitude:
   longitude:
+  # Hours different to UTC time
+  time_difference:
 technical:
   # Mains Voltage in Volt
   mains_voltage:
