@@ -26,11 +26,13 @@ def wait_for_start_time(start_time):
 
 
 def run_charging_loop(end_time):
+    pwl_data = battery.get_battery_data()
+    car_data = car.get_vehicle_data()
     print("Starting loop...")
     logger.info("|Solar power|House usage|Tesla percentage|Powerwall percentage|Tesla currently charging|Overhead "
                 "power|Charging possible with|Charging with|")
-    previous = calculate_charging()
-    while datetime.datetime.now().time() < end_time:
+    previous = calculate_charging(pwl_data, car_data)
+    while datetime.datetime.now().time() < end_time.time():
         time.sleep(cfg['technical']['sleep_time'])
         pwl_data = battery.get_battery_data()
         car_data = car.get_vehicle_data()
