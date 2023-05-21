@@ -74,10 +74,7 @@ def calculate_charging_amp(pwl_data, car_data):
         # subtracting the load power (power which is being used) + buffer (0,1kW)
         # - the power which is being drained currently by the car,
         # of the power which gets generated
-        overhead_power = pwl_data['power_reading'][0]['solar_power'] \
-                         - (pwl_data['power_reading'][0]['load_power']
-                            + cfg['technical']['buffer']
-                            - (car_data['charge_state']['charger_power'] * 1000))
+        overhead_power = pwl_data['power_reading'][0]['solar_power'] - calculate_overhead_power(pwl_data, car_data)
         if pwl_data['percentage_charged'] >= cfg['technical']['powerwall_limit']:
             tesla_charging_power = overhead_power
         else:
@@ -155,7 +152,7 @@ print("    |    |______ ______| |_____  |     |")
 print("                                        ")
 print("========================================")
 
-with open("config.yml", "r") as ymlfile:
+with open("config.test.yml", "r") as ymlfile:
     cfg = yaml.load(ymlfile, Loader=FullLoader)
 
 sun = Sun(cfg['user']['latitude'], cfg['user']['longitude'])
