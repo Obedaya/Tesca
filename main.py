@@ -32,6 +32,7 @@ def run_charging_loop(end_time):
     logger.info("|Solar power|House usage|Tesla percentage|Powerwall percentage|Tesla currently charging|Overhead "
                 "power|Charging possible with|Charging with|")
     previous = calculate_charging(pwl_data, car_data)
+    log_data(pwl_data, car_data, previous)
     while datetime.datetime.now().time() < end_time.time():
         time.sleep(cfg['technical']['sleep_time'])
         pwl_data = battery.get_battery_data()
@@ -77,7 +78,10 @@ def calculate_charging_amp(pwl_data, car_data):
                          - (pwl_data['power_reading'][0]['load_power']
                             + cfg['technical']['buffer']
                             - (car_data['charge_state']['charger_power'] * 1000))
-        tesla_charging_power = (pwl_data['percentage_charged'] / 100) * overhead_power
+        if pwl_data['percentage_charged'] >= cfg['technical']['powerwall_limit']:
+            tesla_charging_power = overhead_power
+        else:
+            tesla_charging_power = (pwl_data['percentage_charged'] / 100) * overhead_power
         tesla_charging_amperage = math.floor(tesla_charging_power / cfg['technical']['mains_voltage'])
         return tesla_charging_amperage
 

@@ -11,5 +11,6 @@ technical:
   buffer:
   min_charging_amp:
   max_charging_amp:
+  powerwall_limit:
   # Time between measurements in seconds. Tested and recommended 300 = 5 min
   sleep_time:

@@ -6,6 +6,9 @@ TESCA (Tesla Solar Charging Automation) is a program that aims to charge your Te
 
 ## Changelog
 
+Tesca Version: v.1.2.1
+- Added a maximum limit for the Tesla Powerwall, at which point all the overhead power goes into the Tesla
+
 Tesca Version: v.1.1.1
 - Added logging system
 - Changes structure
@@ -51,9 +54,14 @@ pip install -r requirements.txt
 
 ## Usage
 
-To use the program you need to configure the config file:
+To use the program you need to copy your own config:
 ```
-sudo nano config.yml
+cp config.tpl.yml config.yml
+```
+
+And configure the newly created config:
+```
+nano config.yml
 ```
 
 Run the script:
